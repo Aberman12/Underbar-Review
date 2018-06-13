@@ -122,7 +122,6 @@ return fin;
 var ar = [];
 _.each(collection, function(item){
 var n = iterator(item);
-console.log(n);
 ar.push(n);
 });
 return ar;
@@ -167,15 +166,23 @@ return ar;
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+if(Array.isArray(collection)){
+var result = collection.slice();
+if(arguments[2] === undefined){
+accumulator = collection[0];
+result = collection.slice(1);
+}
+}
 
-
+_.each(result || collection, function(item){
+accumulator = iterator(accumulator, item);
+});
+return accumulator;
 
   };
 
   // Determine if the array or object contains a given value (using `===`).
   _.contains = function(collection, target) {
-    // TIP: Many iteration problems can be most easily expressed in
-    // terms of reduce(). Here's a freebie to demonstrate!
     return _.reduce(collection, function(wasFound, item) {
       if (wasFound) {
         return true;
@@ -187,13 +194,56 @@ return ar;
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
-    // TIP: Try re-using reduce() here.
+var ar = []
+if(collection.length === 0){
+return true;
+}
+if(arguments[1] === undefined){
+for(var j = 0; j < collection.length; j++){
+if(collection[j] === true){
+ar.push(collection[j]);
+}
+}
+if(collection.length === ar.length){
+return true;
+} else {
+return false;
+}
+}
+
+for(var i = 0; i < collection.length; i++){
+if(iterator(collection[i])){
+ar.push(collection[i]);
+}
+}
+if(ar.length === collection.length){
+return true;
+} else {
+return false;
+}
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
-    // TIP: There's a very clever way to re-use every() here.
+if(collection.length === 0){
+return false;
+}
+if(arguments[1] === undefined){
+ for(var i = 0; i < collection.length; i++){
+if(collection[i]){
+return true;
+}
+}
+return false;
+}
+
+ for(var i = 0; i < collection.length; i++){
+if(iterator(collection[i])){
+return true;
+}
+}
+return false;
   };
 
 
@@ -216,11 +266,27 @@ return ar;
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+for(var i = 0; i < arguments.length; i++){
+  _.each(arguments[i], function(value,key){
+        obj[key] = value;
+  });
+}
+    return obj;
+
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+for(var i = 0; i < arguments.length; i++){
+  _.each(arguments[i], function(value,key){
+if(obj[key] === undefined){
+        obj[key] = value;
+}
+
+  });
+}
+    return obj;
   };
 
 
@@ -264,6 +330,7 @@ return ar;
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -273,6 +340,9 @@ return ar;
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    var arg1 = arguments[2];
+    var arg2 = arguments[3];
+setTimeout(function(){ func(arg1,arg2)}, wait);
   };
 
 
